@@ -2,8 +2,6 @@
 //  Omnitone.swift
 //
 //
-//  Created by Mafalda on 3/5/24.
-//
 
 import Foundation
 
@@ -15,7 +13,9 @@ import TransmissionAsync
 
 public enum OmnitoneMode: String, Codable
 {
-    case POP3Clientcase POP3Server
+    case POP3Client
+    case POP3Server
+    
 }
 
 public class Omnitone: ToneBurstAsync, Codable
