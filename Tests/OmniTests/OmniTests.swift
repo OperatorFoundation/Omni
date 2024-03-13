@@ -17,29 +17,27 @@ final class OmniTests: XCTestCase {
     {
         do
         {
-            let omniClientConfigPath = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("OmniClientConfig.json")
-            
+            let clientConfigPath = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("OmniClientConfig.json")
             let clientMessage = "pass"
             let logger = Logger(label: "Omni")
+            let client = Omni(logger: logger)
             
-            let omniClient = Omni(logger: logger)
-            
-            guard let omniClientConfig = OmniConfig.ClientConfig(path: omniClientConfigPath.path) else
+            guard let clientConfig = OmniConfig.ClientConfig(path: clientConfigPath.path) else
             {
                 XCTFail()
                 return
             }
                     
-            let omniClientConnection = try await omniClient.connect(config: omniClientConfig)
+            let connection = try await client.connect(config: clientConfig)
             
-            print("OmniClient connected to server.")
+            print("☞ Omni Client connected to the server.")
             
-            try await omniClientConnection.writeString(string: clientMessage)
+            try await connection.writeString(string: clientMessage)
             
-            print("OmniClient wrote to server.")
+            print("☞ Omni Client wrote to the server.")
             
-            let response = try await omniClientConnection.read()
-            print("Server response: \(response.string)")
+            let response = try await connection.read()
+            print("☞ Omni Client read from the server: \(response.string)")
             
             XCTAssertEqual(clientMessage, response.string)
         }
