@@ -15,11 +15,7 @@ import TransmissionAsync
 
 public enum OmnitoneMode: String, Codable
 {
-    
-    case POP3Client
-    
-    case POP3Server
-    
+    case POP3Clientcase POP3Server
 }
 
 public class Omnitone: ToneBurstAsync, Codable
