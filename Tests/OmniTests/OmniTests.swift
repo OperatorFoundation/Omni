@@ -22,18 +22,13 @@ final class OmniTests: XCTestCase {
             let logger = Logger(label: "Omni")
             let client = Omni(logger: logger)
             
-            guard let clientConfig = OmniConfig.ClientConfig(path: clientConfigPath.path) else
-            {
-                XCTFail()
-                return
-            }
-                    
-            let connection = try await client.connect(config: clientConfig)
+            let clientConfig = try OmniClientConfig(path: clientConfigPath.path)
+            print("☞ Parsed Omni Client config")
             
+            let connection = try await client.connect(config: clientConfig)
             print("☞ Omni Client connected to the server.")
             
             try await connection.writeString(string: clientMessage)
-            
             print("☞ Omni Client wrote to the server.")
             
             let response = try await connection.read()
@@ -43,6 +38,7 @@ final class OmniTests: XCTestCase {
         }
         catch
         {
+            print("Omni Echo test encountered an error: \(error)")
             XCTFail()
         }
     }

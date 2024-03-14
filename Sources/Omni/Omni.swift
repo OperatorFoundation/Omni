@@ -21,7 +21,7 @@ public class Omni
         self.logger = logger
     }
     
-    public func listen(config: OmniConfig.ServerConfig) throws -> AsyncListener
+    public func listen(config: OmniServerConfig) throws -> AsyncListener
     {
         let serverToneburst = Omnitone(.POP3Server)
         let polishConfig = PolishServerConfig(serverAddress: config.serverAddress, serverPrivateKey: config.serverPrivateKey)
@@ -29,7 +29,7 @@ public class Omni
         return try ReplicantListener(config: replicantConfig, logger: logger)
     }
     
-    public func connect(config: OmniConfig.ClientConfig) async throws -> AsyncConnection
+    public func connect(config: OmniClientConfig) async throws -> AsyncConnection
     {
         let clientToneburst = Omnitone(.POP3Client)
         let polishConfig = PolishClientConfig(serverAddress: config.serverAddress, serverPublicKey: config.serverPublicKey)
