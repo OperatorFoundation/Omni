@@ -14,7 +14,7 @@ public class OmniConfig: Codable
     public let serverPort: UInt16
     public var transportName = "Omni"
     
-    private enum CodingKeys : String, CodingKey
+    internal enum CodingKeys : String, CodingKey
     {
         case serverAddress
         case transportName = "transport"
@@ -52,6 +52,13 @@ public class OmniConfig: Codable
         self.serverPort = port
         self.transportName = try container.decode(String.self, forKey: .transportName)
     }
+    
+    public func encode(to encoder: any Encoder) throws
+    {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(self.serverAddress, forKey: .serverAddress)
+        try container.encode(self.transportName, forKey: .transportName)
+    }
 }
 
 public class OmniServerConfig: OmniConfig, Equatable
@@ -67,6 +74,8 @@ public class OmniServerConfig: OmniConfig, Equatable
     private enum CodingKeys : String, CodingKey
     {
         case serverPrivateKey
+        case serverAddress
+        case transportName = "transport"
     }
     
     public init(serverAddress: String, serverPrivateKey: PrivateKey) throws
@@ -78,11 +87,10 @@ public class OmniServerConfig: OmniConfig, Equatable
     required public init(from decoder: Decoder) throws
     {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-
+        let serverAddress = try container.decode(String.self, forKey: .serverAddress)
         self.serverPrivateKey = try container.decode(PrivateKey.self, forKey: .serverPrivateKey)
-        try super.init(from: decoder)
+        try super.init(serverAddress: serverAddress)
     }
-
     
     public convenience init(from data: Data) throws
     {
@@ -97,7 +105,14 @@ public class OmniServerConfig: OmniConfig, Equatable
         let data = try Data(contentsOf: url)
         try self.init(from: data)
     }
-
+    
+    public override func encode(to encoder: any Encoder) throws 
+    {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(serverPrivateKey, forKey: .serverPrivateKey)
+        try container.encode(serverAddress, forKey: .serverAddress)
+        try container.encode(transportName, forKey: .transportName)
+    }
 }
 
 public class OmniClientConfig: OmniConfig, Equatable
@@ -113,6 +128,8 @@ public class OmniClientConfig: OmniConfig, Equatable
     private enum CodingKeys : String, CodingKey
     {
         case serverPublicKey
+        case serverAddress
+        case transportName = "transport"
     }
     
     public init(serverAddress: String, serverPublicKey: PublicKey) throws
@@ -138,9 +155,17 @@ public class OmniClientConfig: OmniConfig, Equatable
     public required init(from decoder: Decoder) throws
     {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        
+        let serverAddress = try container.decode(String.self, forKey: .serverAddress)
         self.serverPublicKey = try container.decode(PublicKey.self, forKey: .serverPublicKey)
-        try super.init(from: decoder)
+        try super.init(serverAddress: serverAddress)
+    }
+    
+    public override func encode(to encoder: any Encoder) throws
+    {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(serverPublicKey, forKey: .serverPublicKey)
+        try container.encode(serverAddress, forKey: CodingKeys.serverAddress)
+        try container.encode(transportName, forKey: .transportName)
     }
 }
 

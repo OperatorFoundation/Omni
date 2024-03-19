@@ -72,38 +72,23 @@ final class OmniTests: XCTestCase {
         }
     }
     
-    func testCreateNewConfigPair() throws
+    func testCreateNewConfigFiles() throws
     {
         let serverAddress = "127.0.0.1:1234"
         let saveDirectory = FileManager.default.homeDirectoryForCurrentUser
+        let serverConfigFilePath = saveDirectory.appendingPathComponent(OmniServerConfig.serverConfigFilename).path
+        let clientConfigFilePath = saveDirectory.appendingPathComponent(OmniClientConfig.clientConfigFilename).path
         
-        do
-        {
-            let configPair = try generateNewConfigPair(serverAddress: serverAddress)
-            let encoder = JSONEncoder()
-            encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
-            
-            let serverJson = try encoder.encode(configPair.serverConfig)
-            let serverConfigFilePath = saveDirectory.appendingPathComponent(OmniServerConfig.serverConfigFilename).path
-            
-            guard FileManager.default.createFile(atPath: serverConfigFilePath, contents: serverJson) else
-            {
-                throw OmniError.failedToSaveFile(filePath: serverConfigFilePath)
-            }
-
-            let clientJson = try encoder.encode(configPair.clientConfig)
-            let clientConfigFilePath = saveDirectory.appendingPathComponent(OmniClientConfig.clientConfigFilename).path
-
-            guard FileManager.default.createFile(atPath: clientConfigFilePath, contents: clientJson) else
-            {
-                throw OmniError.failedToSaveFile(filePath: clientConfigFilePath)
-            }
-        }
-        catch
-        {
-            print("Could not generate new config pair: \(error)")
-            XCTFail()
-        }
+        try createNewConfigFiles(inDirectory: saveDirectory, serverAddress: serverAddress)
+        print()
+        
+        let newClientConfig = try OmniClientConfig(path: clientConfigFilePath)
+        print("Found a new OmniClientConfig")
+        print("Server public key: \(newClientConfig.serverPublicKey)")
+        
+        let newServerConfig = try OmniServerConfig(path: serverConfigFilePath)
+        print("Found a new OmniServerConfig")
+        print("Server private key: \(newServerConfig.serverPrivateKey)")
         
     }
 }
