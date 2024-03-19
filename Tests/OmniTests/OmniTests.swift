@@ -13,7 +13,7 @@ final class OmniTests: XCTestCase {
         // https://developer.apple.com/documentation/xctest/defining_test_cases_and_test_methods
     }
     
-    func testOmniClientToEchoServe() async
+    func testOmniClientToEchoServer() async
     {
         do
         {
@@ -41,5 +41,69 @@ final class OmniTests: XCTestCase {
             print("Omni Echo test encountered an error: \(error)")
             XCTFail()
         }
+    }
+    
+    func testGenerateConfigs() throws
+    {
+        do
+        {
+            let configPair  = try generateNewConfigPair(serverAddress: "127.0.0.1:1234")
+            print("Generated config pair")
+            
+            let clientConfig = configPair.clientConfig
+            let serverConfig = configPair.serverConfig
+            
+            print("ClientConfig: ")
+            print("ServerAddress: \(clientConfig.serverIP)")
+            print("ServerPort: \(clientConfig.serverPort)")
+            print("ServerPublicKey: \(clientConfig.serverPublicKey)")
+            print("TransportName: \(clientConfig.transportName)")
+            
+            print("ServerConfig: ")
+            print("ServerAddress: \(serverConfig.serverIP)")
+            print("ServerPort: \(serverConfig.serverPort)")
+            print("ServerPrivateKey: \(serverConfig.serverPrivateKey)")
+            print("TransportName: \(serverConfig.transportName)")
+        }
+        catch
+        {
+            print("Could not generate new config pair \(error)")
+            XCTFail()
+        }
+    }
+    
+    func testCreateNewConfigPair() throws
+    {
+        let serverAddress = "127.0.0.1:1234"
+        let saveDirectory = FileManager.default.homeDirectoryForCurrentUser
+        
+        do
+        {
+            let configPair = try generateNewConfigPair(serverAddress: serverAddress)
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
+            
+            let serverJson = try encoder.encode(configPair.serverConfig)
+            let serverConfigFilePath = saveDirectory.appendingPathComponent(OmniServerConfig.serverConfigFilename).path
+            
+            guard FileManager.default.createFile(atPath: serverConfigFilePath, contents: serverJson) else
+            {
+                throw OmniError.failedToSaveFile(filePath: serverConfigFilePath)
+            }
+
+            let clientJson = try encoder.encode(configPair.clientConfig)
+            let clientConfigFilePath = saveDirectory.appendingPathComponent(OmniClientConfig.clientConfigFilename).path
+
+            guard FileManager.default.createFile(atPath: clientConfigFilePath, contents: clientJson) else
+            {
+                throw OmniError.failedToSaveFile(filePath: clientConfigFilePath)
+            }
+        }
+        catch
+        {
+            print("Could not generate new config pair: \(error)")
+            XCTFail()
+        }
+        
     }
 }
