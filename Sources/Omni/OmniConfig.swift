@@ -97,6 +97,7 @@ public class OmniServerConfig: OmniConfig, Equatable
         let data = try Data(contentsOf: url)
         try self.init(from: data)
     }
+
 }
 
 public class OmniClientConfig: OmniConfig, Equatable
