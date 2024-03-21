@@ -47,23 +47,8 @@ final class OmniTests: XCTestCase {
     {
         do
         {
-            let configPair  = try generateNewConfigPair(serverAddress: "127.0.0.1:1234")
+            let configPair  = try OmniConfig.generateNewConfigPair(serverAddress: "127.0.0.1:1234")
             print("Generated config pair")
-            
-            let clientConfig = configPair.clientConfig
-            let serverConfig = configPair.serverConfig
-            
-            print("ClientConfig: ")
-            print("ServerAddress: \(clientConfig.serverIP)")
-            print("ServerPort: \(clientConfig.serverPort)")
-            print("ServerPublicKey: \(clientConfig.serverPublicKey)")
-            print("TransportName: \(clientConfig.transportName)")
-            
-            print("ServerConfig: ")
-            print("ServerAddress: \(serverConfig.serverIP)")
-            print("ServerPort: \(serverConfig.serverPort)")
-            print("ServerPrivateKey: \(serverConfig.serverPrivateKey)")
-            print("TransportName: \(serverConfig.transportName)")
         }
         catch
         {
@@ -79,7 +64,7 @@ final class OmniTests: XCTestCase {
         let serverConfigFilePath = saveDirectory.appendingPathComponent(OmniServerConfig.serverConfigFilename).path
         let clientConfigFilePath = saveDirectory.appendingPathComponent(OmniClientConfig.clientConfigFilename).path
         
-        try createNewConfigFiles(inDirectory: saveDirectory, serverAddress: serverAddress)
+        try OmniConfig.createNewConfigFiles(inDirectory: saveDirectory, serverAddress: serverAddress)
         print()
         
         let newClientConfig = try OmniClientConfig(path: clientConfigFilePath)
