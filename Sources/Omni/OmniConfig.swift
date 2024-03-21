@@ -59,6 +59,45 @@ public class OmniConfig: Codable
         try container.encode(self.serverAddress, forKey: .serverAddress)
         try container.encode(self.transportName, forKey: .transportName)
     }
+    
+    static public func generateNewConfigPair(serverAddress: String) throws -> (serverConfig: OmniServerConfig, clientConfig: OmniClientConfig)
+    {
+        let privateKey = try PrivateKey(type: .P256KeyAgreement)
+        let publicKey = privateKey.publicKey
+
+        let serverConfig = try OmniServerConfig(serverAddress: serverAddress, serverPrivateKey: privateKey)
+        let clientConfig = try OmniClientConfig(serverAddress: serverAddress, serverPublicKey: publicKey)
+        
+        return (serverConfig, clientConfig)
+    }
+
+    static public func createNewConfigFiles(inDirectory saveDirectory: URL, serverAddress: String) throws
+    {
+        guard saveDirectory.hasDirectoryPath else
+        {
+            throw OmniError.urlIsNotDirectory(urlPath: saveDirectory.path)
+        }
+
+        let configPair = try generateNewConfigPair(serverAddress: serverAddress)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
+        
+        let serverJson = try encoder.encode(configPair.serverConfig)
+        let serverConfigFilePath = saveDirectory.appendingPathComponent(OmniServerConfig.serverConfigFilename).path
+        
+        guard FileManager.default.createFile(atPath: serverConfigFilePath, contents: serverJson) else
+        {
+            throw OmniError.failedToSaveFile(filePath: serverConfigFilePath)
+        }
+
+        let clientJson = try encoder.encode(configPair.clientConfig)
+        let clientConfigFilePath = saveDirectory.appendingPathComponent(OmniClientConfig.clientConfigFilename).path
+
+        guard FileManager.default.createFile(atPath: clientConfigFilePath, contents: clientJson) else
+        {
+            throw OmniError.failedToSaveFile(filePath: clientConfigFilePath)
+        }
+    }
 }
 
 public class OmniServerConfig: OmniConfig, Equatable
@@ -166,44 +205,5 @@ public class OmniClientConfig: OmniConfig, Equatable
         try container.encode(serverPublicKey, forKey: .serverPublicKey)
         try container.encode(serverAddress, forKey: CodingKeys.serverAddress)
         try container.encode(transportName, forKey: .transportName)
-    }
-}
-
-public func generateNewConfigPair(serverAddress: String) throws -> (serverConfig: OmniServerConfig, clientConfig: OmniClientConfig)
-{
-    let privateKey = try PrivateKey(type: .P256KeyAgreement)
-    let publicKey = privateKey.publicKey
-
-    let serverConfig = try OmniServerConfig(serverAddress: serverAddress, serverPrivateKey: privateKey)
-    let clientConfig = try OmniClientConfig(serverAddress: serverAddress, serverPublicKey: publicKey)
-    
-    return (serverConfig, clientConfig)
-}
-
-public func createNewConfigFiles(inDirectory saveDirectory: URL, serverAddress: String) throws
-{
-    guard saveDirectory.hasDirectoryPath else
-    {
-        throw OmniError.urlIsNotDirectory(urlPath: saveDirectory.path)
-    }
-
-    let configPair = try generateNewConfigPair(serverAddress: serverAddress)
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
-    
-    let serverJson = try encoder.encode(configPair.serverConfig)
-    let serverConfigFilePath = saveDirectory.appendingPathComponent(OmniServerConfig.serverConfigFilename).path
-    
-    guard FileManager.default.createFile(atPath: serverConfigFilePath, contents: serverJson) else
-    {
-        throw OmniError.failedToSaveFile(filePath: serverConfigFilePath)
-    }
-
-    let clientJson = try encoder.encode(configPair.clientConfig)
-    let clientConfigFilePath = saveDirectory.appendingPathComponent(OmniClientConfig.clientConfigFilename).path
-
-    guard FileManager.default.createFile(atPath: clientConfigFilePath, contents: clientJson) else
-    {
-        throw OmniError.failedToSaveFile(filePath: clientConfigFilePath)
     }
 }
