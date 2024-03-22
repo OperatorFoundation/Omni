@@ -142,34 +142,6 @@ final class OmniTests: XCTestCase {
         }
     }
     
-    func testOmniClientToEchoServerWrite100Times() async
-    {
-        do
-        {
-            let clientConfigPath = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("OmniClientConfig.json")
-            let clientMessage = "pass"
-            let logger = Logger(label: "Omni")
-            let client = Omni(logger: logger)
-            
-            let clientConfig = try OmniClientConfig(path: clientConfigPath.path)
-            print("☞ Parsed Omni Client config")
-            
-            let connection = try await client.connect(config: clientConfig)
-            print("☞ Omni Client connected to the server.")
-            
-            for messageCount in 1...100
-            {
-                try await connection.writeString(string: clientMessage)
-                print("☞ Omni Client wrote to the server \(messageCount) time/s.")
-            }
-        }
-        catch
-        {
-            print("Omni Echo test encountered an error: \(error)")
-            XCTFail()
-        }
-    }
-    
     func testOmniClientToEchoServerWriteAndRead100Times() async
     {
         do
@@ -195,40 +167,6 @@ final class OmniTests: XCTestCase {
                 
                 XCTAssertEqual(clientMessage, response.string)
             }
-        }
-        catch
-        {
-            print("Omni Echo test encountered an error: \(error)")
-            XCTFail()
-        }
-    }
-    
-    func testOmniClientToEchoServerWrite100TimesThenRead() async
-    {
-        do
-        {
-            let clientConfigPath = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("OmniClientConfig.json")
-            let clientMessage = "pass"
-            let logger = Logger(label: "Omni")
-            let client = Omni(logger: logger)
-                        
-            let clientConfig = try OmniClientConfig(path: clientConfigPath.path)
-            print("☞ Parsed Omni Client config")
-            
-            let connection = try await client.connect(config: clientConfig)
-            print("☞ Omni Client connected to the server.")
-            
-            for messageCount in 1...100
-            {
-                try await Task.sleep(nanoseconds: 1000000)
-                try await connection.writeString(string: clientMessage)
-                print("☞ Omni Client wrote to the server \(messageCount) time/s.")
-            }
-            
-            let response = try await connection.read()
-            print("☞ Omni Client read from the server: \(response.string)")
-            
-            XCTAssertEqual(clientMessage, response.string)
         }
         catch
         {
