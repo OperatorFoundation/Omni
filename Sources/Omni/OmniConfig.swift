@@ -102,7 +102,7 @@ public class OmniConfig: Codable
 
 public class OmniServerConfig: OmniConfig, Equatable
 {
-    public static func == (lhs: OmniServerConfig, rhs: OmniServerConfig) -> Bool 
+    public static func == (lhs: OmniServerConfig, rhs: OmniServerConfig) -> Bool
     {
         return lhs.serverPrivateKey == rhs.serverPrivateKey && lhs.serverAddress == rhs.serverAddress
     }
@@ -145,7 +145,7 @@ public class OmniServerConfig: OmniConfig, Equatable
         try self.init(from: data)
     }
     
-    public override func encode(to encoder: any Encoder) throws 
+    public override func encode(to encoder: any Encoder) throws
     {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(serverPrivateKey, forKey: .serverPrivateKey)

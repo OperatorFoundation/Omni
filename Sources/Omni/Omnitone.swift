@@ -74,9 +74,9 @@ public struct OmnitoneInstance
         {
             case .POP3Client:
                 try await handlePOP3Client()
-            
             case .POP3Server:
                 try await handlePOP3Server()
+            
         }
     }
     
@@ -125,31 +125,19 @@ public struct OmnitoneInstance
             throw OmnitoneError.writeFailed
         }
     }
-
-    private func handlePOP3Server() async throws
-    {
-        try await Timeout(Duration.seconds(5)).wait
-        {
-            let _ = try await self.listen(structuredText: StructuredText(TypedText.text("+OK POP3 server ready."), TypedText.newline(Newline.crlf)))
-        }
-
-        try await self.speak(structuredText: StructuredText(TypedText.text("STLS"), TypedText.newline(Newline.crlf)))
-        try await Timeout(Duration.seconds(5)).wait
-        {
-            let _ = try await self.listen(structuredText: StructuredText(TypedText.text("+OK Begin TLS Negotiation"), TypedText.newline(Newline.crlf)))
-        }
-
-        return
-    }
+    
 
     private func handlePOP3Client() async throws
     {
-        try await self.speak(structuredText: StructuredText(TypedText.text("+OK POP3 server ready."), TypedText.newline(Newline.crlf)))
-        try await Timeout(Duration.seconds(5)).wait
-        {
-            let _ = try await self.listen(structuredText: StructuredText(TypedText.text("STLS"), TypedText.newline(Newline.crlf)))
-        }
+        let _ = try await self.listen(structuredText: StructuredText(TypedText.text("+OK POP3 server ready."), TypedText.newline(Newline.crlf)))
+        try await self.speak(structuredText: StructuredText(TypedText.text("STLS"), TypedText.newline(Newline.crlf)))
+        let _ = try await self.listen(structuredText: StructuredText(TypedText.text("+OK Begin TLS Negotiation"), TypedText.newline(Newline.crlf)))
+    }
 
+    private func handlePOP3Server() async throws
+    {
+        try await self.speak(structuredText: StructuredText(TypedText.text("+OK POP3 server ready."), TypedText.newline(Newline.crlf)))
+        let _ = try await self.listen(structuredText: StructuredText(TypedText.text("STLS"), TypedText.newline(Newline.crlf)))
         try await self.speak(structuredText: StructuredText(TypedText.text("+OK Begin TLS Negotiation"), TypedText.newline(Newline.crlf)))
     }
 
